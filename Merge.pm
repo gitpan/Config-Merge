@@ -1,6 +1,6 @@
 package Config::Merge;
 
-# $Id: Merge.pm,v 1.11 2003/05/11 23:20:28 hasant Exp $
+# $Id: Merge.pm,v 1.12 2003/05/24 14:27:21 hasant Exp $
 
 use 5.006;
 use strict;
@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 our @EXPORT = ('merge_config');
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my @default_order = qw(default file custom);
 
@@ -63,7 +63,7 @@ sub _merge {
 
 	my %final_config;
 	my($first, $second, $third) =
-		map $config_sources{$_}, @{$options->{order}};
+		map { $config_sources{$_} || {} } @{$options->{order}};
 
 	# set the base config, if it has nothing in it
 	# just return empty hash
@@ -84,11 +84,11 @@ sub _parse {
 	my($file, $parser) = @_;
 	$parser = \&_parse_config
 		unless defined $parser and ref $parser and ref($parser) eq 'CODE';
-	$parser->($file) or croak "Failed to parse file '$file': $!\n";
+	$parser->($file) or croak "Failed to parse file '$file'\n";
 }
 
-# brought from Web::DataWeb::Config::parse_config()
-# continuation line handling has been fixed (it was
+# Brought from Web::DataWeb::Config::parse_config().
+# Continuation line handling has been fixed (it was
 # broken)
 sub _parse_config {
 	@_ or usage 'FILENAME';

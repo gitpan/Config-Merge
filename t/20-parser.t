@@ -95,8 +95,8 @@ SKIP: {
 
 	$conf = merge_config({
 		parser => sub {
-		use Config::General;
-		my %conf = ParseConfig($_[0]);
+		require Config::General;
+		my %conf = Config::General::ParseConfig($_[0]);
 		return \%conf;
 		},
 		file => $dummy_file,
