@@ -1,0 +1,124 @@
+Config/Merge version 0.01
+=========================
+$Id: README,v 1.3 2003/05/11 23:20:12 hasant Exp $
+
+Config::Merge - Merge configurations from various sources
+
+
+SYNOPSIS
+
+    use Config::Merge;
+    $conf = merge_config([$def_config, $config_file_name, $custom_config]);
+
+    # or you may want different order with external
+    # config parser provided in CODE reference
+    my $conf = merge_config({
+        order => [qw/file default custom/],
+        parser => sub {
+            require Config::General;
+            my %conf = Config::General->new($_[0])->getall;
+            return \%conf;
+        },
+        default => $default_config,
+        file => $config_file_name,
+        custom => $custom_config,
+    });
+
+
+
+ABSTRACT
+
+Config::Merge merges configuration from at most three sources.
+Your application may allow users to define configuration in a file,
+but you also have set predefined (default) configuration. At the
+end you want single configuration by merging them with a certain
+precedence. This module will do just that.
+
+
+DEPENDENCIES
+
+Text::ParseWords
+    Internal parser uses Text::ParseWords::parse_line()
+    to parse configuration file. You don't need it if
+    you know you won't use the internal parser. This
+    module is part of standard distribution.
+
+Sub::Usage
+    It's used to issue insufficient-parameter error from
+    subroutines.  Available at CPAN.
+
+Test::More
+    For testing (with C<make test>) during installation.
+
+
+=head1 DESCRIPTION
+
+There is a plenty of configuration readers/parsers floating around,
+B<Config::Merge> is not trying to be another one. It helps you to
+merge various configuration sources so you get the final configuration
+structure based on predefined order of precedence.
+
+Config::Merge defines three types of configuration source
+(in order of precedence from lowest to higest): C<default>, C<file>,
+and C<custom>.
+
+=over 8
+
+=item B<default>
+
+Configuration of type C<default> contains predefined values for parameters.
+It's meant to be overridden by other source of configuration. Whenever a
+parameter exists in other source, then the value in the default one will be
+replaced. You should set your complete parameters in C<default> type.
+
+=item B<file>
+
+Configuration of type C<file> comes from a file defined by the user of
+the application. In standard operation, each parameter with defined value
+will override corresponding parameter in the C<default> type.
+
+=item B<custom>
+
+Custom configuration comes from other sources than C<default> and C<file>.
+In standard operation it holds the highest precedence over the others.
+It's meant to temporarily set certain parameters in certain condition.
+
+=back
+
+Please take a look at the documentation for full details. After
+installation you can access it using the perldoc(1) program,
+
+    perldoc Config::Merge
+
+
+INSTALLATION
+
+To install this module type the following:
+
+   perl Makefile.PL
+   make
+   make test
+   make install
+
+Of course after you download and unpack the distribution.
+
+Alternatively, you can use CPAN.pm from the command line,
+
+    perl -MCPAN -e 'install Config::Merge'
+
+If for any reason that the installation process doesn't go well, just copy
+the Merge.pm file from the source directory to your Perl modules directory
+(either in the standard location, but you may need sufficient privilege to
+do that; or, to your private ones).
+
+
+COPYRIGHT AND LICENCE
+
+Copyright 2003 by Hasanuddin Tamir <hasan@cpan.org>.  All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself. 
+
+I highly appreciate any feedback, even a single comment,
+about this module.
+

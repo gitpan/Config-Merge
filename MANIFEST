@@ -1,0 +1,8 @@
+Changes
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+Merge.pm
+README
+t/10-basic.t
+t/20-parser.t

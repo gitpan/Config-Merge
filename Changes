@@ -1,0 +1,6 @@
+Revision history for Perl extension Config::Merge.
+
+0.01  Sun Feb 23 11:44:30 2003
+	- original version; created by h2xs 1.22 with options
+		-A -X -b 5.6.0 -d -n Config::Merge
+
