@@ -1,35 +1,44 @@
-use 5.006;
 use ExtUtils::MakeMaker;
 
-print STDERR <<EOF;
-
-====================================================================
-
-You are going to need Text::ParseWords module if
-you plan to use the internal parser. This module
-is part of Perl standard distribution so you
-probably do not have to worry about that.
-
-====================================================================
-
-EOF
-sleep 1;
-
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
-    'NAME'		=> 'Config::Merge',
-    'VERSION_FROM'	=> 'Merge.pm', # finds $VERSION
-    'PREREQ_PM'		=> { # e.g., Module::Name => 1.1
-		'Sub::Usage' => 0,
-		'Test::More' => 0,
-	},
-    ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
-      (ABSTRACT_FROM => 'Merge.pm', # retrieve abstract from module
-       AUTHOR     => 'Hasanuddin Tamir <hasant@cpan.org>') : ()),
-	dist => {
-		COMPRESS => 'gzip -9',
-		SUFFIX => 'gz',
-		POSTOP => 'mv $(DISTVNAME).tar.gz ..',
-	},
+my %prereqs = ( 'Test::More'  => 0,
+                'File::Spec'  => 0,
+                'Storable'    => 0,
+                'Data::Alias' => '1.01',
+                'Config::Any' => '0.07',
 );
+
+my @optional = ( [ 'YAML::Syck', 'YAML' ],
+                 [ 'JSON::Syck', 'JSON' ],
+                 ['Config::Tiny'], ['XML::Simple'], ['Config::General']
+);
+
+## Optional modules
+
+print "OPTIONAL MODULES:\n" . ( '-' x 17 ) . "\n";
+OPTION: foreach my $optional (@optional) {
+    foreach my $module (@$optional) {
+        printf( "  - %-20s : ", $module );
+        eval "require $module";
+        if ($@) {
+            if ( lc( prompt( "Install : [y/N]", 'n' ) ) eq 'y' ) {
+                $prereqs{$module} = 0;
+            }
+            next OPTION;
+        }
+        else {
+            print "Installed\n";
+            next OPTION;
+        }
+    }
+}
+
+WriteMakefile( 'NAME'          => 'Config::Merge',
+               'VERSION_FROM'  => 'Merge.pm',
+               'ABSTRACT_FROM' => 'Merge.pm',
+               'PREREQ_PM'     => \%prereqs,
+               'AUTHOR'        => ' Clinton Gormley <clint@traveljury.com>',
+               $ExtUtils::MakeMaker::VERSION >= 6.31
+               ? ( 'LICENSE' => 'perl' )
+               : (),
+);
+
