@@ -5,7 +5,6 @@ use warnings FATAL => 'all', NONFATAL => 'redefine';
 
 use File::Spec();
 use Storable();
-use Data::Alias();
 use overload (
     '&{}' => sub {
         my $self = shift;
@@ -15,7 +14,7 @@ use overload (
 );
 
 use vars qw($VERSION);
-$VERSION = '1.00';
+$VERSION = '1.01';
 
 =head1 NAME
 
@@ -401,8 +400,8 @@ sub new {
         foreach qw(skip is_local load_as sort);
 
     my $path = $params->{path}
-        or die(   "Configuration directory not specified when creating a new "
-                . "'$class' object" );
+        or die( "Configuration directory not specified when creating a new "
+            . "'$class' object" );
 
     if ( $path && -d $path && -r _ ) {
 
@@ -480,7 +479,7 @@ sub C {
 
         # Have we previously memoised this?
         if ( exists $self->{_memo}->{$path} ) {
-            $config = Data::Alias::deref $self->{_memo}->{$path};
+            $config = ${ $self->{_memo}->{$path} };
         }
 
         # Not memoised, so get it manually
@@ -491,13 +490,11 @@ sub C {
             $self->{_memo}->{$path} = \$config;
         }
     }
-    return wantarray
-        && ref $config
-        && (    ref $config eq 'HASH'
-             || ref $config eq 'ARRAY' )
-        ? ( Data::Alias::deref $config)
-        : $config
 
+    return
+          wantarray && ref($config) eq 'HASH'  ? %{$config}
+        : wantarray && ref($config) eq 'ARRAY' ? @{$config}
+        :                                        $config;
 }
 
 #===================================
@@ -508,9 +505,9 @@ sub _walk_path {
 
     foreach my $key (@$keys) {
         next unless defined $key && length($key);
-        if (    ref $config eq 'ARRAY'
-             && $key =~ /^[0-9]+/
-             && exists $config->[$key] )
+        if (   ref $config eq 'ARRAY'
+            && $key =~ /^[0-9]+/
+            && exists $config->[$key] )
         {
             $config = $config->[$key];
             $key_path .= '.' . $key;
@@ -688,15 +685,15 @@ CONFIG_FILE:
             = $loader
             ? $self->_load_config_file( $loader, $config_file )
             : $self->_load_config( $config_file,
-                                   $self->_join_key_path( $key_path, $name ),
-                                   $loading_local );
+            $self->_join_key_path( $key_path, $name ),
+            $loading_local );
 
         next CONFIG_FILE unless defined $data;
 
         # Merge keys if already exists
-        if (    exists $config->{$name}
-             && ref $config->{$name} eq 'HASH'
-             && ref $data            eq 'HASH' )
+        if (   exists $config->{$name}
+            && ref $config->{$name} eq 'HASH'
+            && ref $data eq 'HASH' )
         {
             $config->{$name}->{$_} = $data->{$_} foreach keys %$data;
         }
@@ -721,9 +718,10 @@ LOCAL_FILE:
 
         next LOCAL_FILE unless defined $data;
 
-        $config = $self->_merge_hash( $config, $name
-                                      ? { $name => $data }
-                                      : $data
+        $config = $self->_merge_hash(
+            $config, $name
+            ? { $name => $data }
+            : $data
         );
     }
 
@@ -747,8 +745,7 @@ sub _load_as {
 
     my $curr_key_path = $self->_join_key_path( $key_path, $name );
     $self->debug( "  ... loading at : "
-                  . ( length($curr_key_path) ? $curr_key_path : '.' ) );
-
+            . ( length($curr_key_path) ? $curr_key_path : '.' ) );
 
     if ( $self->{skip}->( $self, $curr_key_path ) ) {
         $self->debug("  ... skipped by skip()");
@@ -791,7 +788,7 @@ sub _load_config_file {
     $config->clear_cache();
 
 Config data is generally not supposed to be changed at runtime. However, if
-you do make changes, you may get inconsisten results, because lookups are
+you do make changes, you may get inconsistent results, because lookups are
 cached.
 
 For instance:
@@ -926,7 +923,6 @@ USAGE
     return;
 }
 
-
 #===================================
 sub _merge_hash {
 #===================================
@@ -936,7 +932,7 @@ sub _merge_hash {
 KEY:
     foreach my $key ( keys %$local ) {
         if ( ref $local->{$key} eq 'HASH'
-             && exists $config->{$key} )
+            && exists $config->{$key} )
         {
             if ( ref $config->{$key} eq 'HASH' ) {
                 $self->debug("  ... entering hash : $key");
@@ -944,9 +940,9 @@ KEY:
                     = $self->_merge_hash( $config->{$key}, $local->{$key} );
                 next KEY;
             }
-            if (    ref $config->{$key} eq 'ARRAY'
-                 && exists $local->{$key}{'!'}
-                 && ref $local->{$key}{'!'} eq 'HASH' )
+            if (   ref $config->{$key} eq 'ARRAY'
+                && exists $local->{$key}{'!'}
+                && ref $local->{$key}{'!'} eq 'HASH' )
             {
                 $self->_merge_array( $key, $config, $local );
                 next KEY;
@@ -1103,7 +1099,7 @@ sub _merge_array {
         if (@$add) {
             push @$dest, @$add;
             $self->debug(
-                  '      ... appending ' . ( scalar @$add ) . ' element(s)' );
+                '      ... appending ' . ( scalar @$add ) . ' element(s)' );
         }
     }
 
@@ -1111,12 +1107,11 @@ sub _merge_array {
     elsif ( ref $add eq 'HASH' ) {
         foreach my $add_index ( keys %$add ) {
             next unless $add_index =~ /^\d+/;
-            $actions{$add_index} = [ (  exists $actions{$add_index}
-                                            || $add_index >= @$dest
-                                     )
-                                     ? '~'
-                                     : '+',
-                                     $add->{$add_index}
+            $actions{$add_index} = [
+                ( exists $actions{$add_index} || $add_index >= @$dest )
+                ? '~'
+                : '+',
+                $add->{$add_index}
             ];
         }
 
@@ -1314,9 +1309,10 @@ sub load_as {
     return $local ? '' : $filename;
 }
 
-my %callbacks = ( CODE  => \&_init_code_callback,
-                  HASH  => \&_init_hash_callback,
-                  ARRAY => \&_init_array_callback,
+my %callbacks = (
+    CODE  => \&_init_code_callback,
+    HASH  => \&_init_hash_callback,
+    ARRAY => \&_init_array_callback,
 );
 
 =item EXAMPLE USING C<is_local()> AND C<load_as()>
@@ -1487,7 +1483,6 @@ sub _init_array_callback {
     };
 }
 
-
 =head1 SEE ALSO
 
 L<Storable>, L<Config::Any>, L<Config::Any::YAML>,
@@ -1511,8 +1506,7 @@ to make Config::Merge more flexible.
 No bugs have been reported.
 
 Please report any bugs or feature requests to
-bug-config-loader@rt.cpan.org, or through the web interface at
-L<http://rt.cpan.org>.
+L<http://github.com/clintongormley/ConfigMerge/issues>.
 
 =head1 AUTHOR
 
@@ -1520,7 +1514,7 @@ Clinton Gormley, E<lt>clinton@traveljury.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2007 by Clinton Gormley
+Copyright (C) 2007-2010 by Clinton Gormley
 
 =cut
 
