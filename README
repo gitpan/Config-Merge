@@ -21,6 +21,7 @@ SYNOPSIS
        # On startup
        use Config::Merge('My::Config' => '/path/to/config');
 
+
        # Then, in any module where you want to use the config
        package My::Module;
        use My::Config;
@@ -70,34 +71,40 @@ SYNOPSIS
 DESCRIPTION
     Config::Merge is a configuration module which has six goals:
 
-    * Flexible storage
+    *   Flexible storage
+
         Store all configuration in your format(s) of choice (YAML, JSON,
         INI, XML, Perl, Config::General / Apache-style config) broken down
         into individual files in a configuration directory tree, for easy
         maintenance. See "CONFIG TREE LAYOUT"
 
-    * Flexible access
+    *   Flexible access
+
         Provide a simple, easy to read, concise way of accessing the
         configuration values (similar to Template). See "ACCESSING CONFIG
         DATA"
 
-    * Minimal maintenance
+    *   Minimal maintenance
+
         Specify the location of the configuration files only once per
         application, so that it requires minimal effort to relocate. See
         "USING Config::Merge"
 
-    * Easy to alter development environment
+    *   Easy to alter development environment
+
         Provide a way for overriding configuration values on a development
         machine, so that differences between the dev environment and the
         live environment do not get copied over accidentally. See
         "OVERRIDING CONFIG LOCALLY"
 
-    * Minimise memory use
+    *   Minimise memory use
+
         Load all config at startup so that (eg in the mod_perl environment)
         the data is shared between all child processes. See "MINIMISING
         MEMORY USE"
 
-    * Flexible implementation
+    *   Flexible implementation
+
         You may want to use a different schema for your configuration files,
         so you can pass in (or subclass) methods for determining how your
         files are merged. See "ADVANCED USAGE".
@@ -408,7 +415,7 @@ METHODS
             $config->clear_cache();
 
         Config data is generally not supposed to be changed at runtime.
-        However, if you do make changes, you may get inconsisten results,
+        However, if you do make changes, you may get inconsistent results,
         because lookups are cached.
 
         For instance:
@@ -745,14 +752,13 @@ BUGS
     No bugs have been reported.
 
     Please report any bugs or feature requests to
-    bug-config-loader@rt.cpan.org, or through the web interface at
-    <http://rt.cpan.org>.
+    <http://github.com/clintongormley/ConfigMerge/issues>.
 
 AUTHOR
     Clinton Gormley, <clinton@traveljury.com>
 
 COPYRIGHT
-    Copyright (C) 2007 by Clinton Gormley
+    Copyright (C) 2007-2010 by Clinton Gormley
 
 LICENSE
     This library is free software; you can redistribute it and/or modify it
