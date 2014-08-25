@@ -3,7 +3,9 @@ abstract: 'load a configuration directory tree containing YAML, JSON, XML, Perl,
 author:
   - 'Clinton Gormley <drtech@cpan.org>'
 build_requires:
+  Config::Any: '0.07'
   Test::More: '0'
+  YAML: '0'
 configure_requires:
   ExtUtils::MakeMaker: '0'
 dynamic_config: 0
@@ -33,4 +35,4 @@ requires:
 resources:
   bugtracker: https://github.com/clintongormley/ConfigMerge/issues
   repository: git://github.com/clintongormley/ConfigMerge.git
-version: '1.03'
+version: '1.04'

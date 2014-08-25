@@ -4,7 +4,7 @@ use strict;
 use warnings FATAL => 'all', NONFATAL => 'redefine';
 
 use File::Spec();
-use File::Glob ':bsd_glob';
+use File::Glob 'bsd_glob';
 
 use Storable();
 use overload (
@@ -16,7 +16,7 @@ use overload (
 );
 
 use vars qw($VERSION);
-$VERSION = '1.03';
+$VERSION = '1.04';
 
 =head1 NAME
 
@@ -638,7 +638,7 @@ sub _load_config {
     my @local;
 
     my $config_files = $self->{sort}
-        ->( $self, [ glob( File::Spec->catfile( $dir, '*' ) ) ] );
+        ->( $self, [ bsd_glob( File::Spec->catfile( $dir, '*' ) ) ] );
 
     my $is_local = $self->{is_local};
     $self->debug( '', "Entering dir: $dir", '-' x ( length($dir) + 14 ) );

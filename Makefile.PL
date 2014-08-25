@@ -30,9 +30,11 @@ my %WriteMakefileArgs = (
     "warnings" => 0
   },
   "TEST_REQUIRES" => {
-    "Test::More" => 0
+    "Config::Any" => "0.07",
+    "Test::More" => 0,
+    "YAML" => 0
   },
-  "VERSION" => "1.03",
+  "VERSION" => "1.04",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -45,6 +47,7 @@ my %FallbackPrereqs = (
   "File::Spec" => 0,
   "Storable" => 0,
   "Test::More" => 0,
+  "YAML" => 0,
   "overload" => 0,
   "strict" => 0,
   "vars" => 0,
